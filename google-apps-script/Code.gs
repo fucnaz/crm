@@ -20,10 +20,10 @@ const HEADERS = {
 // Datos semilla de prueba
 const DEFAULT_MOCK_DATA = {
   users: [
-    { id: 'usr_admin', name: 'Admin Smart', email: 'admin@gestionsmart.com', password_hash: '$2a$10$tZk52T7P1p0P/Z9HqB.05Og0/eBq62v1aNn475m8aP.e/Hl8rU92C', role: 'administrador' },
-    { id: 'usr_propietario', name: 'Carlos Smart (Owner)', email: 'propietario@gestionsmart.com', password_hash: '$2a$10$wNis05.L7Wd8E1n/R2Yx9uE6UeXQ.8o.92Fqg.7fO/d7o9g6b3eDq', role: 'propietario' },
-    { id: 'usr_vendedor1', name: 'Juan Vendedor', email: 'vendedor@gestionsmart.com', password_hash: '$2a$10$P2N5s.0sE2y.8R2e9O3Yxu1B8pP.u8.fO/d7o9g6b3eDq1234567', role: 'vendedor' },
-    { id: 'usr_secretario1', name: 'Sofia Secretaria', email: 'secretario@gestionsmart.com', password_hash: '$2a$10$H8y9s.8sE2y.7R2e9O3Yxu2B8pP.u8.fO/d7o9g6b3eDq8765432', role: 'secretario' }
+    { id: 'usr_admin', name: 'Admin Smart', email: 'admin@gestionsmart.com', password_hash: '$2b$10$Y7MFeXz3Jsw0aFbYBV53ouPlprsIac3cY.lP4NK2Q0GEAYZAdKgmu', role: 'administrador' },
+    { id: 'usr_propietario', name: 'Carlos Smart (Owner)', email: 'propietario@gestionsmart.com', password_hash: '$2b$10$fOVvkHXiRqdhmdY5P4XJO.7BgCIRCt45RpzT8ta8bBRum08mNrVkK', role: 'propietario' },
+    { id: 'usr_vendedor1', name: 'Juan Vendedor', email: 'vendedor@gestionsmart.com', password_hash: '$2b$10$lx0oN0g7ohh5SK9WlV018efDvHVNHKTM5/I8M2IhoUjWDf78ltp..', role: 'vendedor' },
+    { id: 'usr_secretario1', name: 'Sofia Secretaria', email: 'secretario@gestionsmart.com', password_hash: '$2b$10$em5So3MtnBlmnE86NeQ/teAZ/o8ZZYwFyQVzTdUx5nEFJPFlvAsSq', role: 'secretario' }
   ],
   contacts: [
     { id: 'con_1', name: 'Alejandro', last_name: 'Gómez', email: 'alejandro.gomez@gmail.com', phones: '+34 612 345 678', address: 'Calle Mayor 12, Madrid, España', social_profiles: 'LinkedIn: linkedin.com/in/alejandrogomez', job_title: 'Director de IT', preferences: 'Interesado en software SaaS, prefiere soporte rápido y videollamadas.', segmentation: 'Demográfico: 35-45 años, Madrid. Psicográfico: Innovador, busca automatización.', channel: 'Correo electrónico', assigned_to: 'usr_vendedor1', created_at: '2026-07-01T10:00:00.000Z' },
