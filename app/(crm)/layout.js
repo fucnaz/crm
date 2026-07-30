@@ -117,7 +117,7 @@ export default function CRMLayout({ children }) {
     { name: 'Embudo de Ventas', path: '/pipeline', icon: LineChart, roles: ['administrador', 'propietario', 'vendedor'] }, // Secretarios no ven finanzas/pipeline
     { name: 'Tareas Pendientes', path: '/tasks', icon: CheckSquare, roles: ['administrador', 'propietario', 'vendedor', 'secretario'] },
     { name: 'Base de Datos (Google)', path: '/setup', icon: Database, roles: ['administrador'] }, // Solo Admin
-    { name: 'Usuarios & Accesos', path: '/users', icon: UserCheck, roles: ['administrador'] } // Solo Admin
+    { name: 'Usuarios & Accesos', path: '/users', icon: UserCheck, roles: ['administrador', 'propietario'] }
   ];
 
   const filteredNavItems = navItems.filter(item => item.roles.includes(user?.role));

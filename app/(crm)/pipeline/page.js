@@ -205,7 +205,7 @@ export default function PipelinePage() {
                 <div>
                   <span style={{ display: 'block' }}>{stage}</span>
                   <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--primary)' }}>
-                    {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalValue)}
+                    {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(totalValue)}
                   </span>
                 </div>
                 <span className="kanban-count-badge">{list.length}</span>
@@ -240,7 +240,7 @@ export default function PipelinePage() {
                         
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
                           <span className="kanban-card-value">
-                            {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opp.value)}
+                            {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(opp.value)}
                           </span>
                           {opp.close_date && (
                             <span style={{ fontSize: '10px', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -312,7 +312,7 @@ export default function PipelinePage() {
 
                 <div style={{ display: 'flex', gap: '16px' }}>
                   <div className="form-group" style={{ flex: 1, margin: 0 }}>
-                    <label className="form-label">Valor Estimado (€)</label>
+                    <label className="form-label">Valor Estimado ($ ARS)</label>
                     <input 
                       type="number" 
                       className="form-input" 

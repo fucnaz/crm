@@ -170,7 +170,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="card-value">
-            {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalLTV)}
+            {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(totalLTV)}
           </div>
           <span className="card-subtext">Suma de compras facturadas e ingresadas</span>
         </div>
@@ -184,7 +184,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="card-value">
-            {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(activePipelineValue)}
+            {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(activePipelineValue)}
           </div>
           <span className="card-subtext">{activeOpps.length} oportunidades comerciales activas</span>
         </div>
@@ -211,7 +211,7 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={pipelineStats} margin={{ top: 20, right: 10, left: 10, bottom: 5 }}>
                 <XAxis dataKey="name" stroke="var(--text-secondary)" fontSize={11} tickLine={false} />
-                <YAxis stroke="var(--text-secondary)" fontSize={11} tickLine={false} unit="€" />
+                <YAxis stroke="var(--text-secondary)" fontSize={11} tickLine={false} unit="$" />
                 <Tooltip 
                   contentStyle={{ 
                     backgroundColor: 'var(--bg-secondary)', 
@@ -220,7 +220,7 @@ export default function DashboardPage() {
                     borderRadius: 'var(--border-radius-md)'
                   }}
                   formatter={(value, name, props) => [
-                    `${new Intl.NumberFormat('es-ES').format(value)}€`, 
+                    `$${new Intl.NumberFormat('es-AR').format(value)}`, 
                     'Valor Estimado'
                   ]}
                 />
@@ -249,7 +249,7 @@ export default function DashboardPage() {
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <span style={{ fontWeight: 700, fontSize: '14px', color: 'var(--success)' }}>
-                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(client.ltv)}
+                      {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(client.ltv)}
                     </span>
                     <p style={{ fontSize: '10px', color: 'var(--text-tertiary)' }}>LTV Acumulado</p>
                   </div>

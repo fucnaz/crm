@@ -38,8 +38,8 @@ export function proxy(request) {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
-    // Ruta de administración de usuarios (/users) - solo para administradores
-    if (pathname.startsWith('/users') && user.role !== 'administrador') {
+    // Ruta de administración de usuarios (/users) - solo para administradores y propietarios
+    if (pathname.startsWith('/users') && user.role !== 'administrador' && user.role !== 'propietario') {
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
   } catch (error) {

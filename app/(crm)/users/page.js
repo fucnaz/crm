@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import { CRMContext } from '../layout';
-import { Plus, User, Mail, Shield, ShieldAlert, Edit2, Trash2, Key } from 'lucide-react';
+import { Plus, User, Mail, Shield, ShieldAlert, Edit2, Trash2, Key, Eye, EyeOff } from 'lucide-react';
 
 export default function UsersPage() {
   const { user: currentUser } = useContext(CRMContext);
@@ -22,6 +22,7 @@ export default function UsersPage() {
 
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const showNotification = (msg) => {
     setNotification(msg);
@@ -54,6 +55,7 @@ export default function UsersPage() {
   const handleOpenCreate = () => {
     setForm({ id: '', name: '', email: '', password: '', role: 'vendedor' });
     setEditMode(false);
+    setShowPassword(false);
     setModalOpen(true);
   };
 
@@ -66,6 +68,7 @@ export default function UsersPage() {
       role: user.role
     });
     setEditMode(true);
+    setShowPassword(false);
     setModalOpen(true);
   };
 
@@ -260,18 +263,37 @@ export default function UsersPage() {
                   <label className="form-label">
                     {editMode ? 'Nueva Contraseña (Dejar vacío para mantener la actual)' : 'Contraseña de Acceso *'}
                   </label>
-                  <div style={{ position: 'relative' }}>
-                    <Key size={16} style={{ position: 'absolute', left: '14px', top: '14px', color: 'var(--text-tertiary)' }} />
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <Key size={16} style={{ position: 'absolute', left: '14px', color: 'var(--text-tertiary)', pointerEvents: 'none' }} />
                     <input 
-                      type="password" 
+                      type={showPassword ? 'text' : 'password'} 
                       className="form-input" 
                       placeholder={editMode ? '••••••••' : 'Mínimo 6 caracteres'}
                       value={form.password}
                       onChange={(e) => setForm({ ...form, password: e.target.value })}
                       required={!editMode}
                       minLength={6}
-                      style={{ paddingLeft: '40px' }}
+                      style={{ paddingLeft: '40px', paddingRight: '40px', width: '100%' }}
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{
+                        position: 'absolute',
+                        right: '12px',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: 'var(--text-tertiary)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: 0
+                      }}
+                      title={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
                   </div>
                 </div>
 
@@ -283,7 +305,9 @@ export default function UsersPage() {
                     disabled={editMode && form.id === currentUser.id} // Evitar quitarse el admin a sí mismo
                     onChange={(e) => setForm({ ...form, role: e.target.value })}
                   >
-                    <option value="administrador">Administrador (Control total)</option>
+                    {currentUser.role === 'administrador' && (
+                      <option value="administrador">Administrador (Control total)</option>
+                    )}
                     <option value="propietario">Propietario / Dirección (Visualiza finanzas y LTV)</option>
                     <option value="vendedor">Vendedor (Solo gestiona sus tratos y clientes asignados)</option>
                     <option value="secretario">Secretario / Soporte (Registra contactos y actividades)</option>

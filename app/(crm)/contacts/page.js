@@ -488,7 +488,7 @@ export default function ContactsPage() {
                     </td>
                     <td>
                       <strong style={{ color: 'var(--success)' }}>
-                        {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(Number(c.ltv) || 0)}
+                        {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(Number(c.ltv) || 0)}
                       </strong>
                     </td>
                     <td>
@@ -729,8 +729,8 @@ export default function ContactsPage() {
                               <span>{new Date(trx.date).toLocaleDateString('es-ES')}</span>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginTop: '4px' }}>
-                              <span>Cant: {trx.quantity} &times; {trx.price}€</span>
-                              <strong style={{ color: 'var(--success)' }}>Total: {trx.total}€</strong>
+                              <span>Cant: {trx.quantity} &times; ${trx.price}</span>
+                              <strong style={{ color: 'var(--success)' }}>Total: ${trx.total}</strong>
                             </div>
                           </div>
                         ))
@@ -766,7 +766,7 @@ export default function ContactsPage() {
                           />
                         </div>
                         <div className="form-group" style={{ margin: 0, flex: 2 }}>
-                          <label className="form-label">Precio Unitario (€)</label>
+                          <label className="form-label">Precio Unitario ($ ARS)</label>
                           <input 
                             type="number" 
                             className="form-input" 
@@ -825,7 +825,7 @@ export default function ContactsPage() {
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginTop: '6px' }}>
                               <span>Cierre estim.: {opp.close_date || '-'}</span>
-                              <strong style={{ color: 'var(--primary)' }}>Valor: {opp.value}€</strong>
+                              <strong style={{ color: 'var(--primary)' }}>Valor: ${opp.value}</strong>
                             </div>
                           </div>
                         ))
@@ -851,7 +851,7 @@ export default function ContactsPage() {
 
                       <div style={{ display: 'flex', gap: '12px' }}>
                         <div className="form-group" style={{ margin: 0, flex: 1 }}>
-                          <label className="form-label">Valor Estimado (€)</label>
+                          <label className="form-label">Valor Estimado ($ ARS)</label>
                           <input 
                             type="number" 
                             className="form-input" 
@@ -924,7 +924,7 @@ export default function ContactsPage() {
                             <p className="list-item-desc" style={{ fontSize: '12px', margin: '4px 0' }}>{bud.description}</p>
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 600 }}>
                               <span style={{ color: 'var(--text-tertiary)' }}>Creado: {bud.date_created}</span>
-                              <span style={{ color: 'var(--primary)' }}>Monto: {bud.amount}€</span>
+                              <span style={{ color: 'var(--primary)' }}>Monto: ${bud.amount}</span>
                             </div>
                           </div>
                         ))
@@ -950,7 +950,7 @@ export default function ContactsPage() {
 
                       <div style={{ display: 'flex', gap: '12px' }}>
                         <div className="form-group" style={{ margin: 0, flex: 2 }}>
-                          <label className="form-label">Total Presupuestado (€)</label>
+                          <label className="form-label">Total Presupuestado ($ ARS)</label>
                           <input 
                             type="number" 
                             className="form-input" 

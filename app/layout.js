@@ -20,6 +20,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/assets/image/logogestionsmart.png" type="image/png"/>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
