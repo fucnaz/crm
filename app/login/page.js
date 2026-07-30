@@ -57,11 +57,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleQuickLogin = (quickEmail, quickPassword) => {
-    setEmail(quickEmail);
-    setPassword(quickPassword);
-  };
-
   return (
     <div className="login-container">
       {/* SECCIÓN IZQUIERDA (CORPORATIVA) */}
@@ -157,48 +152,6 @@ export default function LoginPage() {
               <span>{loading ? 'Validando...' : 'Acceder al Sistema'}</span>
             </button>
           </form>
-
-          {/* ACCESOS RÁPIDOS PARA PRUEBAS */}
-          <div style={{ marginTop: '36px', paddingTop: '24px', borderTop: '1px solid var(--border-color)' }}>
-            <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Accesos de Prueba (Auto-completar)
-            </span>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '12px' }}>
-              <button 
-                type="button" 
-                onClick={() => handleQuickLogin('admin@gestionsmart.com', 'admin123')}
-                className="btn btn-secondary"
-                style={{ padding: '8px', fontSize: '12px', justifyContent: 'flex-start' }}
-              >
-                🛠️ Admin
-              </button>
-              <button 
-                type="button" 
-                onClick={() => handleQuickLogin('propietario@gestionsmart.com', 'propietario123')}
-                className="btn btn-secondary"
-                style={{ padding: '8px', fontSize: '12px', justifyContent: 'flex-start' }}
-              >
-                💼 Propietario
-              </button>
-              <button 
-                type="button" 
-                onClick={() => handleQuickLogin('vendedor@gestionsmart.com', 'vendedor123')}
-                className="btn btn-secondary"
-                style={{ padding: '8px', fontSize: '12px', justifyContent: 'flex-start' }}
-              >
-                📈 Ventas
-              </button>
-              <button 
-                type="button" 
-                onClick={() => handleQuickLogin('secretario@gestionsmart.com', 'secretario123')}
-                className="btn btn-secondary"
-                style={{ padding: '8px', fontSize: '12px', justifyContent: 'flex-start' }}
-              >
-                📝 Soporte
-              </button>
-            </div>
-          </div>
-
         </div>
       </div>
     </div>
