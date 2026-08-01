@@ -1,18 +1,19 @@
 import { NextResponse } from 'next/server';
-import { initializeDatabase, isGoogleSheetsConfigured } from '@/lib/sheets';
+import { initializeFirebaseDatabase as initializeDatabase, isFirebaseConfigured } from '@/lib/firebase';
 import { getSessionUser } from '@/lib/auth';
 
 export async function GET() {
   try {
-    const isConfigured = isGoogleSheetsConfigured();
-    const mode = isConfigured ? 'google_sheets' : 'mock';
+    const isConfigured = isFirebaseConfigured();
+    const mode = isConfigured ? 'firebase_firestore' : 'mock';
     return NextResponse.json({
       configured: isConfigured,
       mode,
-      scriptUrl: process.env.GOOGLE_SCRIPT_URL || null,
+      projectId: process.env.FIREBASE_PROJECT_ID || null,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL || null,
       message: isConfigured 
-        ? 'El motor de Google Apps Script está configurado correctamente.' 
-        : 'Google Apps Script no está configurado. Usando base de datos mock local.'
+        ? 'El motor de Firebase Firestore está configurado correctamente.' 
+        : 'Firebase no está configurado. Usando base de datos mock local.'
     });
   } catch (error) {
     console.error('Setup GET API Error:', error);
@@ -55,8 +56,8 @@ export async function POST(request) {
       return NextResponse.json({
         success: true,
         mode: result.mode,
-        message: result.mode === 'google_sheets'
-          ? 'Las pestañas de Google Sheets han sido inicializadas y los datos de prueba han sido sembrados.'
+        message: result.mode === 'firebase_firestore'
+          ? 'Las colecciones de Firebase Firestore han sido inicializadas y los datos de prueba han sido sembrados.'
           : 'La base de datos local de respaldo ha sido reestablecida con los datos de prueba.'
       });
     } else {
@@ -64,7 +65,7 @@ export async function POST(request) {
         success: false,
         mode: result.mode,
         error: result.error,
-        message: 'No se pudo conectar con la API de Google Sheets. Verifica las credenciales en tu archivo .env.local.'
+        message: 'No se pudo conectar con Firebase Firestore. Verifica las credenciales en tu archivo .env.local.'
       }, { status: 400 });
     }
   } catch (error) {
