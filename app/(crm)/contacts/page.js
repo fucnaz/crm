@@ -2,19 +2,19 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import { CRMContext } from '../layout';
-import { 
-  Plus, 
-  Search, 
-  User, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Briefcase, 
-  Activity, 
-  DollarSign, 
+import {
+  Plus,
+  Search,
+  User,
+  Phone,
+  Mail,
+  MapPin,
+  Briefcase,
+  Activity,
+  DollarSign,
   FileText,
-  CheckSquare, 
-  Edit2, 
+  CheckSquare,
+  Edit2,
   Trash2,
   ExternalLink,
   MessageSquare,
@@ -24,7 +24,7 @@ import {
 
 export default function ContactsPage() {
   const { user } = useContext(CRMContext);
-  
+
   // Lista de datos
   const [contacts, setContacts] = useState([]);
   const [interactions, setInteractions] = useState([]);
@@ -100,7 +100,7 @@ export default function ContactsPage() {
         const trxData = await transactionsRes.json();
         const oppsData = await opportunitiesRes.json();
         const budData = await budgetsRes.json();
-        
+
         setTransactions(trxData.transactions || []);
         setOpportunities(oppsData.opportunities || []);
         setBudgets(budData.budgets || []);
@@ -202,7 +202,7 @@ export default function ContactsPage() {
 
   const handleDeleteContact = async (contactId) => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar este contacto? Esta acción también borrará su historial.')) return;
-    
+
     try {
       const res = await fetch(`/api/contacts/${contactId}`, { method: 'DELETE' });
       if (res.ok) {
@@ -229,8 +229,8 @@ export default function ContactsPage() {
       const res = await fetch('/api/interactions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          contact_id: selectedContact.id, 
+        body: JSON.stringify({
+          contact_id: selectedContact.id,
           ...interactionForm,
           date: interactionForm.date || new Date().toISOString()
         })
@@ -255,8 +255,8 @@ export default function ContactsPage() {
       const res = await fetch('/api/transactions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          contact_id: selectedContact.id, 
+        body: JSON.stringify({
+          contact_id: selectedContact.id,
           product_name: transactionForm.product_name,
           quantity: Number(transactionForm.quantity),
           price: Number(transactionForm.price),
@@ -283,9 +283,9 @@ export default function ContactsPage() {
       const res = await fetch('/api/opportunities', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          contact_id: selectedContact.id, 
-          ...opportunityForm 
+        body: JSON.stringify({
+          contact_id: selectedContact.id,
+          ...opportunityForm
         })
       });
       const data = await res.json();
@@ -308,9 +308,9 @@ export default function ContactsPage() {
       const res = await fetch('/api/budgets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          contact_id: selectedContact.id, 
-          ...budgetForm 
+        body: JSON.stringify({
+          contact_id: selectedContact.id,
+          ...budgetForm
         })
       });
       const data = await res.json();
@@ -333,8 +333,8 @@ export default function ContactsPage() {
       const res = await fetch('/api/tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          contact_id: selectedContact.id, 
+        body: JSON.stringify({
+          contact_id: selectedContact.id,
           title: taskForm.title,
           description: taskForm.description,
           due_date: taskForm.due_date,
@@ -377,58 +377,6 @@ export default function ContactsPage() {
     return found ? found.name : userId.replace('usr_', '');
   };
 
-  const handleExportCSV = () => {
-    // 1. Definir cabeceras del CSV
-    const headers = [
-      'ID', 'Nombre', 'Apellido', 'Email', 'Teléfono', 'Puesto Laboral', 
-      'Dirección Física', 'Perfiles Sociales', 'Preferencias', 'Segmentación', 
-      'Canal Preferido', 'Agente Asignado', 'Valor Vital (LTV ARS)', 'Fecha de Creación'
-    ];
-    
-    // Función auxiliar para escapar valores en formato CSV
-    const escapeCSV = (val) => {
-      if (val === undefined || val === null) return '';
-      const str = String(val);
-      // Rodear con comillas dobles y escapar las existentes
-      return `"${str.replace(/"/g, '""')}"`;
-    };
-
-    // 2. Mapear contactos a filas del CSV
-    const rows = contacts.map(c => {
-      const agentName = getUserName(c.assigned_to) || 'Ninguno';
-      return [
-        c.id,
-        c.name,
-        c.last_name,
-        c.email,
-        c.phones,
-        c.job_title,
-        c.address,
-        c.social_profiles,
-        c.preferences,
-        c.segmentation,
-        c.channel,
-        agentName,
-        c.ltv || 0,
-        c.created_at || ''
-      ].map(escapeCSV).join(';');
-    });
-
-    // 3. Crear contenido con BOM UTF-8 para soporte de caracteres especiales en Excel en español
-    const csvContent = '\uFEFF' + [headers.join(';'), ...rows].join('\n');
-    
-    // 4. Iniciar la descarga del archivo en el navegador
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `contactos_crm_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   // ==========================================
   // FILTRADO DE CONTACTOS
   // ==========================================
@@ -452,15 +400,15 @@ export default function ContactsPage() {
 
   // Verificar si el usuario puede editar el contacto seleccionado
   const canEditSelected = selectedContact && (
-    user.role === 'administrador' || 
-    user.role === 'propietario' || 
+    user.role === 'administrador' ||
+    user.role === 'propietario' ||
     user.role === 'secretario' ||
     (user.role === 'vendedor' && selectedContact.assigned_to === user.id)
   );
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      
+
       {notification.message && (
         <div className={`alert-banner ${notification.type}`} style={{ position: 'fixed', top: '20px', right: '40px', zIndex: 1000, boxShadow: 'var(--shadow-lg)' }}>
           <div>{notification.message}</div>
@@ -480,17 +428,11 @@ export default function ContactsPage() {
             style={{ paddingLeft: '40px' }}
           />
         </div>
-        
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button onClick={handleExportCSV} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <FileText size={18} />
-            <span>Descargar CSV</span>
-          </button>
-          <button onClick={handleOpenCreateContact} className="btn btn-primary">
-            <Plus size={18} />
-            <span>Nuevo Contacto</span>
-          </button>
-        </div>
+
+        <button onClick={handleOpenCreateContact} className="btn btn-primary">
+          <Plus size={18} />
+          <span>Nuevo Contacto</span>
+        </button>
       </div>
 
       {/* TABLA PRINCIPAL DE CONTACTOS */}
@@ -503,7 +445,7 @@ export default function ContactsPage() {
                 <th>Puesto / Cargo</th>
                 <th>Email / Teléfono</th>
                 <th>Canal Preferido</th>
-                <th>Valor Vital (LTV)</th>
+                <th>Ventas</th>
                 <th>Acciones</th>
               </tr>
             </thead>
@@ -520,7 +462,7 @@ export default function ContactsPage() {
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <div className="avatar" style={{ width: '32px', height: '32px', fontSize: '12px' }}>
-                          {c.name.substring(0,2)}
+                          {c.name.substring(0, 2)}
                         </div>
                         <div>
                           <strong>{c.name} {c.last_name}</strong>
@@ -540,10 +482,10 @@ export default function ContactsPage() {
                       </div>
                     </td>
                     <td>
-                      <span style={{ 
-                        fontSize: '12px', 
-                        padding: '2px 8px', 
-                        borderRadius: 'var(--border-radius-full)', 
+                      <span style={{
+                        fontSize: '12px',
+                        padding: '2px 8px',
+                        borderRadius: 'var(--border-radius-full)',
                         backgroundColor: 'var(--bg-tertiary)',
                         fontWeight: 600
                       }}>
@@ -557,17 +499,17 @@ export default function ContactsPage() {
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: '8px' }}>
-                        <button 
+                        <button
                           onClick={() => { setSelectedContact(c); setActiveDetailTab('perfil'); }}
-                          className="btn btn-secondary" 
+                          className="btn btn-secondary"
                           style={{ padding: '6px 12px', fontSize: '12px' }}
                         >
                           <ExternalLink size={14} style={{ marginRight: '4px' }} /> Ver Detalles
                         </button>
                         {(user.role === 'administrador' || user.role === 'propietario') && (
-                          <button 
+                          <button
                             onClick={() => handleDeleteContact(c.id)}
-                            className="btn btn-icon" 
+                            className="btn btn-icon"
                             style={{ width: '32px', height: '32px', color: 'var(--danger)', padding: 0 }}
                           >
                             <Trash2 size={14} />
@@ -599,9 +541,9 @@ export default function ContactsPage() {
                   </p>
                 </div>
               </div>
-              <button 
-                onClick={() => setSelectedContact(null)} 
-                className="btn-icon" 
+              <button
+                onClick={() => setSelectedContact(null)}
+                className="btn-icon"
                 style={{ border: 'none' }}
               >
                 ✕
@@ -637,17 +579,17 @@ export default function ContactsPage() {
             </div>
 
             <div className="modal-body" style={{ minHeight: '380px' }}>
-              
+
               {/* PESTAÑA: PERFIL */}
               {activeDetailTab === 'perfil' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  
+
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h3 className="detail-section-title">Detalles Personales y Demográficos</h3>
                     {canEditSelected && (
-                      <button 
-                        onClick={() => handleOpenEditContact(selectedContact)} 
-                        className="btn btn-secondary" 
+                      <button
+                        onClick={() => handleOpenEditContact(selectedContact)}
+                        className="btn btn-secondary"
                         style={{ padding: '6px 12px', fontSize: '13px' }}
                       >
                         <Edit2 size={12} style={{ marginRight: '4px' }} /> Editar Perfil
@@ -703,7 +645,7 @@ export default function ContactsPage() {
               {/* PESTAÑA: INTERACCIONES */}
               {activeDetailTab === 'interacciones' && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '20px' }}>
-                  
+
                   {/* Historial */}
                   <div>
                     <h3 className="detail-section-title">Registro Histórico de Actividades</h3>
@@ -731,9 +673,9 @@ export default function ContactsPage() {
                     <form onSubmit={handleAddInteraction} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label">Tipo de Contacto</label>
-                        <select 
-                          className="form-select" 
-                          value={interactionForm.type} 
+                        <select
+                          className="form-select"
+                          value={interactionForm.type}
                           onChange={(e) => setInteractionForm({ ...interactionForm, type: e.target.value })}
                         >
                           <option value="Llamada">📞 Llamada Telefónica</option>
@@ -743,22 +685,22 @@ export default function ContactsPage() {
                           <option value="Soporte">🛠️ Ticket de Soporte</option>
                         </select>
                       </div>
-                      
+
                       <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label">Fecha y Hora</label>
-                        <input 
-                          type="datetime-local" 
-                          className="form-input" 
-                          value={interactionForm.date} 
+                        <input
+                          type="datetime-local"
+                          className="form-input"
+                          value={interactionForm.date}
                           onChange={(e) => setInteractionForm({ ...interactionForm, date: e.target.value })}
                         />
                       </div>
 
                       <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label">Notas de Interacción</label>
-                        <textarea 
-                          className="form-textarea" 
-                          rows="3" 
+                        <textarea
+                          className="form-textarea"
+                          rows="3"
                           placeholder="Temas tratados, conclusiones o acuerdos..."
                           value={interactionForm.description}
                           onChange={(e) => setInteractionForm({ ...interactionForm, description: e.target.value })}
@@ -778,7 +720,7 @@ export default function ContactsPage() {
               {/* PESTAÑA: TRANSACCIONES (COMPRAS) */}
               {activeDetailTab === 'transacciones' && user.role !== 'secretario' && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '20px' }}>
-                  
+
                   {/* Historial */}
                   <div>
                     <h3 className="detail-section-title">Historial de Compras</h3>
@@ -808,9 +750,9 @@ export default function ContactsPage() {
                     <form onSubmit={handleAddTransaction} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label">Producto / Servicio</label>
-                        <input 
-                          type="text" 
-                          className="form-input" 
+                        <input
+                          type="text"
+                          className="form-input"
                           placeholder="Nombre del producto o pack adquirido"
                           value={transactionForm.product_name}
                           onChange={(e) => setTransactionForm({ ...transactionForm, product_name: e.target.value })}
@@ -821,9 +763,9 @@ export default function ContactsPage() {
                       <div style={{ display: 'flex', gap: '12px' }}>
                         <div className="form-group" style={{ margin: 0, flex: 1 }}>
                           <label className="form-label">Cant.</label>
-                          <input 
-                            type="number" 
-                            className="form-input" 
+                          <input
+                            type="number"
+                            className="form-input"
                             value={transactionForm.quantity}
                             onChange={(e) => setTransactionForm({ ...transactionForm, quantity: e.target.value })}
                             required
@@ -831,9 +773,9 @@ export default function ContactsPage() {
                         </div>
                         <div className="form-group" style={{ margin: 0, flex: 2 }}>
                           <label className="form-label">Precio Unitario ($ ARS)</label>
-                          <input 
-                            type="number" 
-                            className="form-input" 
+                          <input
+                            type="number"
+                            className="form-input"
                             placeholder="Monto"
                             value={transactionForm.price}
                             onChange={(e) => setTransactionForm({ ...transactionForm, price: e.target.value })}
@@ -844,9 +786,9 @@ export default function ContactsPage() {
 
                       <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label">Fecha de Compra</label>
-                        <input 
-                          type="date" 
-                          className="form-input" 
+                        <input
+                          type="date"
+                          className="form-input"
                           value={transactionForm.date}
                           onChange={(e) => setTransactionForm({ ...transactionForm, date: e.target.value })}
                         />
@@ -864,7 +806,7 @@ export default function ContactsPage() {
               {/* PESTAÑA: OPORTUNIDADES */}
               {activeDetailTab === 'oportunidades' && user.role !== 'secretario' && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '20px' }}>
-                  
+
                   {/* Historial */}
                   <div>
                     <h3 className="detail-section-title">Oportunidades en Curso</h3>
@@ -876,9 +818,9 @@ export default function ContactsPage() {
                           <div key={opp.id} className="list-item-card" style={{ padding: '10px' }}>
                             <div className="list-item-header">
                               <strong>{opp.title}</strong>
-                              <span style={{ 
-                                fontSize: '11px', 
-                                padding: '2px 6px', 
+                              <span style={{
+                                fontSize: '11px',
+                                padding: '2px 6px',
                                 borderRadius: 'var(--border-radius-sm)',
                                 fontWeight: 700,
                                 backgroundColor: opp.stage === 'Cerrado Ganado' ? 'var(--success-light)' : opp.stage === 'Cerrado Perdido' ? 'var(--danger-light)' : 'var(--warning-light)',
@@ -903,9 +845,9 @@ export default function ContactsPage() {
                     <form onSubmit={handleAddOpportunity} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label">Título del Trato</label>
-                        <input 
-                          type="text" 
-                          className="form-input" 
+                        <input
+                          type="text"
+                          className="form-input"
                           placeholder="Ej: Licencias Enterprise v2.0"
                           value={opportunityForm.title}
                           onChange={(e) => setOpportunityForm({ ...opportunityForm, title: e.target.value })}
@@ -916,9 +858,9 @@ export default function ContactsPage() {
                       <div style={{ display: 'flex', gap: '12px' }}>
                         <div className="form-group" style={{ margin: 0, flex: 1 }}>
                           <label className="form-label">Valor Estimado ($ ARS)</label>
-                          <input 
-                            type="number" 
-                            className="form-input" 
+                          <input
+                            type="number"
+                            className="form-input"
                             placeholder="Importe"
                             value={opportunityForm.value}
                             onChange={(e) => setOpportunityForm({ ...opportunityForm, value: e.target.value })}
@@ -927,8 +869,8 @@ export default function ContactsPage() {
                         </div>
                         <div className="form-group" style={{ margin: 0, flex: 1 }}>
                           <label className="form-label">Fase del Funnel</label>
-                          <select 
-                            className="form-select" 
+                          <select
+                            className="form-select"
                             value={opportunityForm.stage}
                             onChange={(e) => setOpportunityForm({ ...opportunityForm, stage: e.target.value })}
                           >
@@ -942,9 +884,9 @@ export default function ContactsPage() {
 
                       <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label">Cierre Esperado</label>
-                        <input 
-                          type="date" 
-                          className="form-input" 
+                        <input
+                          type="date"
+                          className="form-input"
                           value={opportunityForm.close_date}
                           onChange={(e) => setOpportunityForm({ ...opportunityForm, close_date: e.target.value })}
                         />
@@ -962,7 +904,7 @@ export default function ContactsPage() {
               {/* PESTAÑA: PRESUPUESTOS */}
               {activeDetailTab === 'presupuestos' && user.role !== 'secretario' && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '20px' }}>
-                  
+
                   {/* Historial */}
                   <div>
                     <h3 className="detail-section-title">Presupuestos Generados</h3>
@@ -974,9 +916,9 @@ export default function ContactsPage() {
                           <div key={bud.id} className="list-item-card" style={{ padding: '10px' }}>
                             <div className="list-item-header">
                               <strong>{bud.title}</strong>
-                              <span style={{ 
-                                fontSize: '11px', 
-                                padding: '2px 6px', 
+                              <span style={{
+                                fontSize: '11px',
+                                padding: '2px 6px',
                                 borderRadius: 'var(--border-radius-sm)',
                                 fontWeight: 700,
                                 backgroundColor: bud.status === 'Firmado' ? 'var(--success-light)' : bud.status === 'Rechazado' ? 'var(--danger-light)' : 'var(--warning-light)',
@@ -1002,9 +944,9 @@ export default function ContactsPage() {
                     <form onSubmit={handleAddBudget} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label">Título del Presupuesto</label>
-                        <input 
-                          type="text" 
-                          className="form-input" 
+                        <input
+                          type="text"
+                          className="form-input"
                           placeholder="Ej: Presupuesto Licencias Standard v1.0"
                           value={budgetForm.title}
                           onChange={(e) => setBudgetForm({ ...budgetForm, title: e.target.value })}
@@ -1015,9 +957,9 @@ export default function ContactsPage() {
                       <div style={{ display: 'flex', gap: '12px' }}>
                         <div className="form-group" style={{ margin: 0, flex: 2 }}>
                           <label className="form-label">Total Presupuestado ($ ARS)</label>
-                          <input 
-                            type="number" 
-                            className="form-input" 
+                          <input
+                            type="number"
+                            className="form-input"
                             placeholder="Monto total"
                             value={budgetForm.amount}
                             onChange={(e) => setBudgetForm({ ...budgetForm, amount: e.target.value })}
@@ -1026,8 +968,8 @@ export default function ContactsPage() {
                         </div>
                         <div className="form-group" style={{ margin: 0, flex: 1.5 }}>
                           <label className="form-label">Estado Inicial</label>
-                          <select 
-                            className="form-select" 
+                          <select
+                            className="form-select"
                             value={budgetForm.status}
                             onChange={(e) => setBudgetForm({ ...budgetForm, status: e.target.value })}
                           >
@@ -1041,9 +983,9 @@ export default function ContactsPage() {
 
                       <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label">Condiciones / Detalle</label>
-                        <textarea 
-                          className="form-textarea" 
-                          rows="3" 
+                        <textarea
+                          className="form-textarea"
+                          rows="3"
                           placeholder="Especifica los conceptos, horas de trabajo, o licencias incluidas..."
                           value={budgetForm.description}
                           onChange={(e) => setBudgetForm({ ...budgetForm, description: e.target.value })}
@@ -1062,7 +1004,7 @@ export default function ContactsPage() {
               {/* PESTAÑA: TAREAS */}
               {activeDetailTab === 'tareas' && (
                 <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '20px' }}>
-                  
+
                   {/* Historial */}
                   <div>
                     <h3 className="detail-section-title">Tareas Comerciales Programadas</h3>
@@ -1072,9 +1014,9 @@ export default function ContactsPage() {
                       ) : (
                         contactTasks.map(tsk => (
                           <div key={tsk.id} style={{ display: 'flex', gap: '12px', padding: '10px', backgroundColor: 'var(--bg-tertiary)', borderRadius: 'var(--border-radius-md)', border: '1px solid var(--border-color)' }}>
-                            <input 
-                              type="checkbox" 
-                              checked={tsk.status === 'Completada'} 
+                            <input
+                              type="checkbox"
+                              checked={tsk.status === 'Completada'}
                               onChange={() => handleToggleTaskStatus(tsk)}
                               style={{ width: '16px', height: '16px', cursor: 'pointer', marginTop: '2px' }}
                             />
@@ -1100,9 +1042,9 @@ export default function ContactsPage() {
                     <form onSubmit={handleAddTask} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                       <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label">Acción Comercial</label>
-                        <input 
-                          type="text" 
-                          className="form-input" 
+                        <input
+                          type="text"
+                          className="form-input"
                           placeholder="Ej: Llamar para validar feedback"
                           value={taskForm.title}
                           onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
@@ -1112,9 +1054,9 @@ export default function ContactsPage() {
 
                       <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label font-label">Fecha Límite</label>
-                        <input 
-                          type="date" 
-                          className="form-input" 
+                        <input
+                          type="date"
+                          className="form-input"
                           value={taskForm.due_date}
                           onChange={(e) => setTaskForm({ ...taskForm, due_date: e.target.value })}
                           required
@@ -1123,9 +1065,9 @@ export default function ContactsPage() {
 
                       <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label">Asignado a (Agente)</label>
-                        <select 
-                          className="form-select" 
-                          value={taskForm.assigned_to} 
+                        <select
+                          className="form-select"
+                          value={taskForm.assigned_to}
                           onChange={(e) => setTaskForm({ ...taskForm, assigned_to: e.target.value })}
                         >
                           <option value={user.id}>Mí mismo</option>
@@ -1137,9 +1079,9 @@ export default function ContactsPage() {
 
                       <div className="form-group" style={{ margin: 0 }}>
                         <label className="form-label">Descripción</label>
-                        <textarea 
-                          className="form-textarea" 
-                          rows="2" 
+                        <textarea
+                          className="form-textarea"
+                          rows="2"
                           placeholder="Detalles sobre lo que se debe hacer..."
                           value={taskForm.description}
                           onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })}
@@ -1170,26 +1112,26 @@ export default function ContactsPage() {
             </div>
             <form onSubmit={handleSaveContact}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                
+
                 <div style={{ display: 'flex', gap: '16px' }}>
                   <div className="form-group" style={{ flex: 1, margin: 0 }}>
                     <label className="form-label">Nombre *</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
-                      value={contactForm.name} 
-                      onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })} 
-                      required 
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={contactForm.name}
+                      onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                      required
                     />
                   </div>
                   <div className="form-group" style={{ flex: 1, margin: 0 }}>
                     <label className="form-label">Apellidos *</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
-                      value={contactForm.last_name} 
-                      onChange={(e) => setContactForm({ ...contactForm, last_name: e.target.value })} 
-                      required 
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={contactForm.last_name}
+                      onChange={(e) => setContactForm({ ...contactForm, last_name: e.target.value })}
+                      required
                     />
                   </div>
                 </div>
@@ -1197,20 +1139,20 @@ export default function ContactsPage() {
                 <div style={{ display: 'flex', gap: '16px' }}>
                   <div className="form-group" style={{ flex: 1, margin: 0 }}>
                     <label className="form-label">Email</label>
-                    <input 
-                      type="email" 
-                      className="form-input" 
-                      value={contactForm.email} 
-                      onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })} 
+                    <input
+                      type="email"
+                      className="form-input"
+                      value={contactForm.email}
+                      onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
                     />
                   </div>
                   <div className="form-group" style={{ flex: 1, margin: 0 }}>
                     <label className="form-label">Teléfonos</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
-                      value={contactForm.phones} 
-                      onChange={(e) => setContactForm({ ...contactForm, phones: e.target.value })} 
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={contactForm.phones}
+                      onChange={(e) => setContactForm({ ...contactForm, phones: e.target.value })}
                     />
                   </div>
                 </div>
@@ -1218,19 +1160,19 @@ export default function ContactsPage() {
                 <div style={{ display: 'flex', gap: '16px' }}>
                   <div className="form-group" style={{ flex: 1, margin: 0 }}>
                     <label className="form-label">Puesto Laboral</label>
-                    <input 
-                      type="text" 
-                      className="form-input" 
+                    <input
+                      type="text"
+                      className="form-input"
                       placeholder="Ej: Director IT"
-                      value={contactForm.job_title} 
-                      onChange={(e) => setContactForm({ ...contactForm, job_title: e.target.value })} 
+                      value={contactForm.job_title}
+                      onChange={(e) => setContactForm({ ...contactForm, job_title: e.target.value })}
                     />
                   </div>
                   <div className="form-group" style={{ flex: 1, margin: 0 }}>
                     <label className="form-label">Canal Preferido</label>
-                    <select 
-                      className="form-select" 
-                      value={contactForm.channel} 
+                    <select
+                      className="form-select"
+                      value={contactForm.channel}
                       onChange={(e) => setContactForm({ ...contactForm, channel: e.target.value })}
                     >
                       <option value="Correo electrónico">Correo electrónico</option>
@@ -1243,44 +1185,44 @@ export default function ContactsPage() {
 
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">Dirección Física</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
-                    value={contactForm.address} 
-                    onChange={(e) => setContactForm({ ...contactForm, address: e.target.value })} 
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={contactForm.address}
+                    onChange={(e) => setContactForm({ ...contactForm, address: e.target.value })}
                   />
                 </div>
 
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">Perfiles en Redes Sociales</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
+                  <input
+                    type="text"
+                    className="form-input"
                     placeholder="Ej: LinkedIn: linkedin.com/in/nombre"
-                    value={contactForm.social_profiles} 
-                    onChange={(e) => setContactForm({ ...contactForm, social_profiles: e.target.value })} 
+                    value={contactForm.social_profiles}
+                    onChange={(e) => setContactForm({ ...contactForm, social_profiles: e.target.value })}
                   />
                 </div>
 
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">Preferencias y Comportamiento</label>
-                  <textarea 
-                    className="form-textarea" 
-                    rows="2" 
+                  <textarea
+                    className="form-textarea"
+                    rows="2"
                     placeholder="Gustos, hábitos de compra, necesidades específicas..."
-                    value={contactForm.preferences} 
-                    onChange={(e) => setContactForm({ ...contactForm, preferences: e.target.value })} 
+                    value={contactForm.preferences}
+                    onChange={(e) => setContactForm({ ...contactForm, preferences: e.target.value })}
                   />
                 </div>
 
                 <div className="form-group" style={{ margin: 0 }}>
                   <label className="form-label">Segmentación Demográfica/Psicográfica</label>
-                  <input 
-                    type="text" 
-                    className="form-input" 
+                  <input
+                    type="text"
+                    className="form-input"
                     placeholder="Ej: Edad 30-40, Directivo, Innovador"
-                    value={contactForm.segmentation} 
-                    onChange={(e) => setContactForm({ ...contactForm, segmentation: e.target.value })} 
+                    value={contactForm.segmentation}
+                    onChange={(e) => setContactForm({ ...contactForm, segmentation: e.target.value })}
                   />
                 </div>
 
@@ -1288,9 +1230,9 @@ export default function ContactsPage() {
                 {(user.role === 'administrador' || user.role === 'propietario') && (
                   <div className="form-group" style={{ margin: 0 }}>
                     <label className="form-label">Agente Asignado (Propietario)</label>
-                    <select 
-                      className="form-select" 
-                      value={contactForm.assigned_to} 
+                    <select
+                      className="form-select"
+                      value={contactForm.assigned_to}
                       onChange={(e) => setContactForm({ ...contactForm, assigned_to: e.target.value })}
                     >
                       <option value="">Ninguno</option>

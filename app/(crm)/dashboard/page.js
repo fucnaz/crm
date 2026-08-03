@@ -2,25 +2,26 @@
 
 import React, { useState, useEffect, useContext } from 'react';
 import { CRMContext } from '../layout';
-import { 
-  Users, 
-  DollarSign, 
-  TrendingUp, 
-  CheckCircle, 
-  Phone, 
-  Mail, 
-  Calendar, 
+import {
+  Users,
+  DollarSign,
+  TrendingUp,
+  CheckCircle,
+  Phone,
+  Mail,
+  Calendar,
   MessageSquare,
-  AlertCircle
+  AlertCircle,
+  FileText
 } from 'lucide-react';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  ResponsiveContainer, 
-  Cell 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Cell
 } from 'recharts';
 
 export default function DashboardPage() {
@@ -30,29 +31,62 @@ export default function DashboardPage() {
     contacts: [],
     opportunities: [],
     interactions: [],
-    tasks: []
+    tasks: [],
+    transactions: [],
+    budgets: [],
+    users: []
   });
 
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const [contactsRes, oppsRes, interactionsRes, tasksRes] = await Promise.all([
+
+      const promises = [
         fetch('/api/contacts'),
         fetch('/api/opportunities'),
         fetch('/api/interactions'),
         fetch('/api/tasks')
-      ]);
+      ];
 
-      const contactsData = await contactsRes.json();
-      const oppsData = await oppsRes.json();
-      const interactionsData = await interactionsRes.json();
-      const tasksData = await tasksRes.json();
+      // Cargar financiero si no es secretario
+      if (user.role !== 'secretario') {
+        promises.push(fetch('/api/transactions'));
+        promises.push(fetch('/api/budgets'));
+      }
+
+      // Cargar usuarios si es administrador o propietario
+      if (user.role === 'administrador' || user.role === 'propietario') {
+        promises.push(fetch('/api/users'));
+      }
+
+      const responses = await Promise.all(promises);
+
+      const contactsData = await responses[0].json();
+      const oppsData = await responses[1].json();
+      const interactionsData = await responses[2].json();
+      const tasksData = await responses[3].json();
+
+      let transactionsData = { transactions: [] };
+      let budgetsData = { budgets: [] };
+      let usersData = { users: [] };
+
+      let responseIdx = 4;
+      if (user.role !== 'secretario') {
+        transactionsData = await responses[responseIdx++].json();
+        budgetsData = await responses[responseIdx++].json();
+      }
+      if (user.role === 'administrador' || user.role === 'propietario') {
+        usersData = await responses[responseIdx++].json();
+      }
 
       setData({
         contacts: contactsData.contacts || [],
         opportunities: oppsData.opportunities || [],
         interactions: interactionsData.interactions || [],
-        tasks: tasksData.tasks || []
+        tasks: tasksData.tasks || [],
+        transactions: transactionsData.transactions || [],
+        budgets: budgetsData.budgets || [],
+        users: usersData.users || []
       });
     } catch (e) {
       console.error('Error loading dashboard data:', e);
@@ -144,9 +178,118 @@ export default function DashboardPage() {
     return contact ? `${contact.name} ${contact.last_name}` : 'Contacto Desconocido';
   };
 
+  const handleExportCSV = () => {
+    // 1. Definir cabeceras del CSV
+    const headers = [
+      'ID', 'Nombre', 'Apellido', 'Email', 'Teléfono', 'Puesto Laboral',
+      'Dirección Física', 'Perfiles Sociales', 'Preferencias', 'Segmentación',
+      'Canal Preferido', 'Agente Asignado', 'Fecha de Creación',
+      'Valor Vital (LTV ARS)', 'Cantidad de Transacciones', 'Oportunidad Comercial Reciente',
+      'Fase Oportunidad Reciente', 'Valor Oportunidad Reciente', 'Cantidad de Presupuestos',
+      'Cantidad de Interacciones', 'Tareas Pendientes', 'Tareas Totales'
+    ];
+
+    // Función auxiliar para escapar valores en formato CSV
+    const escapeCSV = (val) => {
+      if (val === undefined || val === null) return '';
+      const str = String(val);
+      // Rodear con comillas dobles y escapar las existentes
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+
+    const getUserName = (userId) => {
+      if (!userId) return 'Ninguno';
+      const found = data.users.find(u => u.id === userId);
+      return found ? found.name : userId.replace('usr_', '');
+    };
+
+    // 2. Mapear contactos a filas del CSV con los datos consolidados
+    const rows = data.contacts.map(c => {
+      const agentName = getUserName(c.assigned_to);
+
+      // Filtrar datos específicos de este contacto
+      const contactTransactions = data.transactions.filter(t => t.contact_id === c.id);
+      const contactOpps = data.opportunities.filter(o => o.contact_id === c.id);
+      const contactBudgets = data.budgets.filter(b => b.contact_id === c.id);
+      const contactInteractions = data.interactions.filter(i => i.contact_id === c.id);
+      const contactTasks = data.tasks.filter(t => t.contact_id === c.id);
+
+      // Calcular LTV y total transacciones
+      const transactionCount = user.role === 'secretario' ? 'N/D' : contactTransactions.length;
+      const budgetCount = user.role === 'secretario' ? 'N/D' : contactBudgets.length;
+
+      // Obtener oportunidad reciente
+      let recentOppTitle = 'Ninguno';
+      let recentOppStage = 'Ninguno';
+      let recentOppValue = 0;
+
+      if (contactOpps.length > 0) {
+        const sortedOpps = [...contactOpps].sort((a, b) => b.id.localeCompare(a.id));
+        recentOppTitle = sortedOpps[0].title;
+        recentOppStage = sortedOpps[0].stage;
+        recentOppValue = sortedOpps[0].value || 0;
+      }
+
+      const pendingTasksCount = contactTasks.filter(t => t.status !== 'Completada').length;
+      const totalTasksCount = contactTasks.length;
+
+      return [
+        c.id,
+        c.name,
+        c.last_name,
+        c.email,
+        c.phones,
+        c.job_title,
+        c.address,
+        c.social_profiles,
+        c.preferences,
+        c.segmentation,
+        c.channel,
+        agentName,
+        c.created_at || '',
+        c.ltv || 0,
+        transactionCount,
+        recentOppTitle,
+        recentOppStage,
+        recentOppValue,
+        budgetCount,
+        contactInteractions.length,
+        pendingTasksCount,
+        totalTasksCount
+      ].map(escapeCSV).join(';');
+    });
+
+    // 3. Crear contenido con BOM UTF-8 para soporte de caracteres especiales en Excel en español
+    const csvContent = '\uFEFF' + [headers.join(';'), ...rows].join('\n');
+
+    // 4. Iniciar la descarga del archivo en el navegador
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `crm_datos_consolidados_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-      
+
+      {/* SECCIÓN DE BIENVENIDA Y ACCIONES */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+        <div>
+          <h2 style={{ fontSize: '18px', fontWeight: 700 }}>Bienvenido, {user.name}</h2>
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Aquí tienes el resumen de la actividad comercial de hoy.</p>
+        </div>
+
+        <button onClick={handleExportCSV} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <FileText size={18} />
+          <span>Exportar Todo el Sistema (CSV)</span>
+        </button>
+      </div>
+
       {/* 1. SECCIÓN DE MÉTRICAS CLAVE */}
       <section className="metrics-grid">
         {/* Total Clientes */}
@@ -164,7 +307,7 @@ export default function DashboardPage() {
         {/* LTV Total */}
         <div className="card">
           <div className="card-header-flex">
-            <span className="card-title">Valor de Vida Total (LTV)</span>
+            <span className="card-title">Ventas</span>
             <div className="card-icon-container" style={{ backgroundColor: 'var(--success-light)', color: 'var(--success)' }}>
               <DollarSign size={20} />
             </div>
@@ -178,7 +321,7 @@ export default function DashboardPage() {
         {/* Embudo Activo */}
         <div className="card">
           <div className="card-header-flex">
-            <span className="card-title">Embudo en Negociación</span>
+            <span className="card-title">Prospecto de venta</span>
             <div className="card-icon-container" style={{ backgroundColor: 'var(--info-light)', color: 'var(--info)' }}>
               <TrendingUp size={20} />
             </div>
@@ -212,15 +355,15 @@ export default function DashboardPage() {
               <BarChart data={pipelineStats} margin={{ top: 20, right: 10, left: 10, bottom: 5 }}>
                 <XAxis dataKey="name" stroke="var(--text-secondary)" fontSize={11} tickLine={false} />
                 <YAxis stroke="var(--text-secondary)" fontSize={11} tickLine={false} unit="$" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'var(--bg-secondary)', 
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'var(--bg-secondary)',
                     borderColor: 'var(--border-color)',
                     color: 'var(--text-primary)',
                     borderRadius: 'var(--border-radius-md)'
                   }}
                   formatter={(value, name, props) => [
-                    `$${new Intl.NumberFormat('es-AR').format(value)}`, 
+                    `$${new Intl.NumberFormat('es-AR').format(value)}`,
                     'Valor Estimado'
                   ]}
                 />
@@ -262,7 +405,7 @@ export default function DashboardPage() {
 
       {/* 3. ÚLTIMAS ACCIONES & MIS TAREAS */}
       <section className="dashboard-grid">
-        
+
         {/* Recientes interacciones logueadas */}
         <div className="card">
           <h3 style={{ fontSize: '16px', fontWeight: 700, marginBottom: '16px' }}>Actividad Reciente</h3>
@@ -271,19 +414,19 @@ export default function DashboardPage() {
               <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>No hay actividades registradas.</p>
             ) : (
               recentInteractions.map(interaction => {
-                const iconColor = 
+                const iconColor =
                   interaction.type === 'Llamada' ? 'var(--info)' :
-                  interaction.type === 'Correo' ? 'var(--primary)' :
-                  interaction.type === 'Reunión' ? 'var(--warning)' : 'var(--success)';
-                
+                    interaction.type === 'Correo' ? 'var(--primary)' :
+                      interaction.type === 'Reunión' ? 'var(--warning)' : 'var(--success)';
+
                 return (
                   <div key={interaction.id} className="list-item-card" style={{ margin: 0, padding: '12px' }}>
                     <div className="list-item-header">
-                      <span style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '6px', 
-                        color: iconColor, 
+                      <span style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        color: iconColor,
                         fontWeight: 700,
                         fontSize: '11px',
                         textTransform: 'uppercase'
@@ -316,27 +459,91 @@ export default function DashboardPage() {
                 <p style={{ fontSize: '11px' }}>No tienes tareas pendientes asignadas.</p>
               </div>
             ) : (
-              myPendingTasks.slice(0, 4).map(task => (
-                <div key={task.id} style={{ display: 'flex', gap: '12px', padding: '12px', backgroundColor: 'var(--bg-tertiary)', borderRadius: 'var(--border-radius-md)', border: '1px solid var(--border-color)' }}>
-                  <AlertCircle size={16} style={{ color: 'var(--warning)', flexShrink: 0, marginTop: '2px' }} />
-                  <div>
-                    <h4 style={{ fontSize: '13px', fontWeight: 700 }}>{task.title}</h4>
-                    <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>{task.description}</p>
-                    <span style={{ 
-                      display: 'inline-block', 
-                      fontSize: '10px', 
-                      color: 'var(--danger)', 
-                      backgroundColor: 'var(--danger-light)', 
-                      padding: '2px 6px', 
-                      borderRadius: 'var(--border-radius-sm)',
-                      fontWeight: 600,
-                      marginTop: '6px'
-                    }}>
-                      Vence: {new Date(task.due_date).toLocaleDateString('es-ES')}
-                    </span>
+              myPendingTasks.slice(0, 4).map(task => {
+                const isDueTomorrow = (() => {
+                  const today = new Date();
+                  const tomorrow = new Date(today);
+                  tomorrow.setDate(tomorrow.getDate() + 1);
+                  const formatLocalDateStr = (d) => {
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                  };
+                  return task.due_date === formatLocalDateStr(tomorrow);
+                })();
+
+                const isOverdue = !isDueTomorrow && (() => {
+                  const today = new Date();
+                  today.setHours(0,0,0,0);
+                  const parts = task.due_date.split('-');
+                  if (parts.length !== 3) return false;
+                  const taskDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+                  taskDate.setHours(0,0,0,0);
+                  return taskDate < today;
+                })();
+
+                return (
+                  <div key={task.id} style={{ 
+                    display: 'flex', 
+                    gap: '12px', 
+                    padding: '12px', 
+                    backgroundColor: 'var(--bg-tertiary)', 
+                    borderRadius: 'var(--border-radius-md)', 
+                    border: '1px solid var(--border-color)',
+                    borderLeft: isDueTomorrow ? '4px solid var(--warning)' : isOverdue ? '4px solid var(--danger)' : '1px solid var(--border-color)'
+                  }}>
+                    {isOverdue ? (
+                      <AlertCircle size={16} style={{ color: 'var(--danger)', flexShrink: 0, marginTop: '2px' }} />
+                    ) : (
+                      <AlertCircle size={16} style={{ color: 'var(--warning)', flexShrink: 0, marginTop: '2px' }} />
+                    )}
+                    <div>
+                      <h4 style={{ fontSize: '13px', fontWeight: 700 }}>{task.title}</h4>
+                      <p style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px' }}>{task.description}</p>
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
+                        <span style={{
+                          display: 'inline-block',
+                          fontSize: '10px',
+                          color: isOverdue ? 'var(--danger)' : isDueTomorrow ? 'var(--warning)' : 'var(--text-secondary)',
+                          backgroundColor: isOverdue ? 'var(--danger-light)' : isDueTomorrow ? 'var(--warning-light)' : 'var(--bg-tertiary)',
+                          padding: '2px 6px',
+                          borderRadius: 'var(--border-radius-sm)',
+                          fontWeight: 600
+                        }}>
+                          Vence: {new Date(task.due_date).toLocaleDateString('es-ES')}
+                        </span>
+                        {isDueTomorrow && (
+                          <span style={{
+                            display: 'inline-block',
+                            fontSize: '10px',
+                            color: 'var(--warning)',
+                            backgroundColor: 'var(--warning-light)',
+                            padding: '2px 6px',
+                            borderRadius: 'var(--border-radius-sm)',
+                            fontWeight: 700
+                          }}>
+                            ⚠️ VENCE MAÑANA
+                          </span>
+                        )}
+                        {isOverdue && (
+                          <span style={{
+                            display: 'inline-block',
+                            fontSize: '10px',
+                            color: 'var(--danger)',
+                            backgroundColor: 'var(--danger-light)',
+                            padding: '2px 6px',
+                            borderRadius: 'var(--border-radius-sm)',
+                            fontWeight: 700
+                          }}>
+                            VENCIDA
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>

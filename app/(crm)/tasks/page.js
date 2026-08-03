@@ -227,10 +227,31 @@ export default function TasksPage() {
           </div>
         ) : (
           filteredTasks.map(task => {
-            const isOverdue = task.status === 'Pendiente' && new Date(task.due_date) < new Date().setHours(0,0,0,0);
+            const isDueTomorrow = task.status === 'Pendiente' && (() => {
+              const today = new Date();
+              const tomorrow = new Date(today);
+              tomorrow.setDate(tomorrow.getDate() + 1);
+              const formatLocalDateStr = (d) => {
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+              };
+              return task.due_date === formatLocalDateStr(tomorrow);
+            })();
+
+            const isOverdue = task.status === 'Pendiente' && !isDueTomorrow && (() => {
+              const today = new Date();
+              today.setHours(0,0,0,0);
+              const parts = task.due_date.split('-');
+              if (parts.length !== 3) return false;
+              const taskDate = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+              taskDate.setHours(0,0,0,0);
+              return taskDate < today;
+            })();
             
             return (
-              <div key={task.id} className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 24px', borderLeft: task.status === 'Completada' ? '4px solid var(--success)' : isOverdue ? '4px solid var(--danger)' : '4px solid var(--warning)' }}>
+              <div key={task.id} className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 24px', borderLeft: task.status === 'Completada' ? '4px solid var(--success)' : isOverdue ? '4px solid var(--danger)' : isDueTomorrow ? '4px solid var(--warning)' : '4px solid var(--border-color)' }}>
                 {/* Checkbox */}
                 <input 
                   type="checkbox" 
@@ -251,6 +272,11 @@ export default function TasksPage() {
                     }}>
                       {task.title}
                     </h4>
+                    {isDueTomorrow && (
+                      <span style={{ fontSize: '10px', fontWeight: 700, backgroundColor: 'var(--warning-light)', color: 'var(--warning)', padding: '2px 6px', borderRadius: 'var(--border-radius-sm)' }}>
+                        ⚠️ VENCE MAÑANA
+                      </span>
+                    )}
                     {isOverdue && (
                       <span style={{ fontSize: '10px', fontWeight: 700, backgroundColor: 'var(--danger-light)', color: 'var(--danger)', padding: '2px 6px', borderRadius: 'var(--border-radius-sm)' }}>
                         VENCIDA
