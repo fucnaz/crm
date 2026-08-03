@@ -106,8 +106,8 @@ export default function ContactsPage() {
         setBudgets(budData.budgets || []);
       }
 
-      // Cargar lista de usuarios para asignación si es Admin
-      if (user.role === 'administrador') {
+      // Cargar lista de usuarios para asignación si es Admin o Propietario
+      if (user.role === 'administrador' || user.role === 'propietario') {
         const usersRes = await fetch('/api/users');
         if (usersRes.ok) {
           const usersData = await usersRes.json();
@@ -371,6 +371,64 @@ export default function ContactsPage() {
     }
   };
 
+  const getUserName = (userId) => {
+    if (!userId) return '';
+    const found = usersList.find(u => u.id === userId);
+    return found ? found.name : userId.replace('usr_', '');
+  };
+
+  const handleExportCSV = () => {
+    // 1. Definir cabeceras del CSV
+    const headers = [
+      'ID', 'Nombre', 'Apellido', 'Email', 'Teléfono', 'Puesto Laboral', 
+      'Dirección Física', 'Perfiles Sociales', 'Preferencias', 'Segmentación', 
+      'Canal Preferido', 'Agente Asignado', 'Valor Vital (LTV ARS)', 'Fecha de Creación'
+    ];
+    
+    // Función auxiliar para escapar valores en formato CSV
+    const escapeCSV = (val) => {
+      if (val === undefined || val === null) return '';
+      const str = String(val);
+      // Rodear con comillas dobles y escapar las existentes
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+
+    // 2. Mapear contactos a filas del CSV
+    const rows = contacts.map(c => {
+      const agentName = getUserName(c.assigned_to) || 'Ninguno';
+      return [
+        c.id,
+        c.name,
+        c.last_name,
+        c.email,
+        c.phones,
+        c.job_title,
+        c.address,
+        c.social_profiles,
+        c.preferences,
+        c.segmentation,
+        c.channel,
+        agentName,
+        c.ltv || 0,
+        c.created_at || ''
+      ].map(escapeCSV).join(';');
+    });
+
+    // 3. Crear contenido con BOM UTF-8 para soporte de caracteres especiales en Excel en español
+    const csvContent = '\uFEFF' + [headers.join(';'), ...rows].join('\n');
+    
+    // 4. Iniciar la descarga del archivo en el navegador
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `contactos_crm_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // ==========================================
   // FILTRADO DE CONTACTOS
   // ==========================================
@@ -423,10 +481,16 @@ export default function ContactsPage() {
           />
         </div>
         
-        <button onClick={handleOpenCreateContact} className="btn btn-primary">
-          <Plus size={18} />
-          <span>Nuevo Contacto</span>
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button onClick={handleExportCSV} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <FileText size={18} />
+            <span>Descargar CSV</span>
+          </button>
+          <button onClick={handleOpenCreateContact} className="btn btn-primary">
+            <Plus size={18} />
+            <span>Nuevo Contacto</span>
+          </button>
+        </div>
       </div>
 
       {/* TABLA PRINCIPAL DE CONTACTOS */}
@@ -462,7 +526,7 @@ export default function ContactsPage() {
                           <strong>{c.name} {c.last_name}</strong>
                           {c.assigned_to && (
                             <span style={{ display: 'block', fontSize: '11px', color: 'var(--text-tertiary)' }}>
-                              Asignado a: {c.assigned_to.replace('usr_', '')}
+                              Asignado a: {getUserName(c.assigned_to)}
                             </span>
                           )}
                         </div>
