@@ -14,7 +14,9 @@ import {
   Moon,
   Database,
   FileText,
-  UserCheck
+  UserCheck,
+  Menu,
+  X
 } from 'lucide-react';
 
 // Crear contextos de Autenticación y Temas
@@ -26,6 +28,12 @@ export default function CRMLayout({ children }) {
   const [theme, setTheme] = useState('dark');
   const router = useRouter();
   const pathname = usePathname();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Cerrar el menú lateral en móviles cuando cambia la ruta
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   // Cargar tema desde localStorage al montar
   useEffect(() => {
@@ -126,8 +134,17 @@ export default function CRMLayout({ children }) {
     <CRMContext.Provider value={{ user, loading, logout: handleLogout, theme, toggleTheme, refreshUser: fetchSession }}>
       <div className="app-container">
         
+        {/* SIDEBAR OVERLAY */}
+        <div className={`sidebar-overlay ${mobileMenuOpen ? 'open' : ''}`} onClick={() => setMobileMenuOpen(false)} />
+
         {/* SIDEBAR */}
-        <aside className="sidebar">
+        <aside className={`sidebar ${mobileMenuOpen ? 'open' : ''}`}>
+          <div className="sidebar-mobile-header">
+            <span className="brand-title">Gestion Smart</span>
+            <button onClick={() => setMobileMenuOpen(false)} className="btn-icon" style={{ border: 'none' }}>
+              <X size={20} />
+            </button>
+          </div>
           <div className="brand-section">
             <img 
               src="/assets/image/logogestionsmart.png" 
@@ -199,15 +216,26 @@ export default function CRMLayout({ children }) {
         <div className="main-wrapper">
           {/* HEADER */}
           <header className="header">
-            <div className="header-title-section">
-              <h1 className="page-title">
-                {pathname === '/dashboard' && 'Panel de Control'}
-                {pathname === '/contacts' && 'Directorio de Contactos'}
-                {pathname === '/pipeline' && 'Ventas'}
-                {pathname === '/tasks' && 'Tareas Comerciales'}
-                {pathname === '/setup' && 'Configuración de Google Sheets'}
-                {pathname === '/users' && 'Gestión de Usuarios'}
-              </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <button 
+                onClick={() => setMobileMenuOpen(true)} 
+                className="btn-icon mobile-menu-btn" 
+                style={{ display: 'none' }}
+                title="Abrir menú"
+              >
+                <Menu size={20} />
+              </button>
+              
+              <div className="header-title-section">
+                <h1 className="page-title">
+                  {pathname === '/dashboard' && 'Panel de Control'}
+                  {pathname === '/contacts' && 'Directorio de Contactos'}
+                  {pathname === '/pipeline' && 'Ventas'}
+                  {pathname === '/tasks' && 'Tareas Comerciales'}
+                  {pathname === '/setup' && 'Configuración de Google Sheets'}
+                  {pathname === '/users' && 'Gestión de Usuarios'}
+                </h1>
+              </div>
             </div>
             
             <div className="header-actions">

@@ -863,3 +863,124 @@ button, input, select, textarea {
   color: var(--success);
   border-color: var(--success);
 }
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (MEDIA QUERIES)
+   ========================================================================== */
+
+/* Mobile Sidebar & Layout Breakpoint */
+@media (max-width: 991px) {
+  .sidebar {
+    transform: translateX(-100%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1000;
+    height: 100vh;
+    width: 280px;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-normal);
+  }
+
+  .sidebar-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .sidebar-mobile-header {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 16px;
+  }
+
+  .main-wrapper {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+
+  .header {
+    padding: 0 24px !important;
+  }
+
+  .mobile-menu-btn {
+    display: flex !important;
+  }
+}
+
+/* Tablet & Mobile Screens */
+@media (max-width: 768px) {
+  .header {
+    padding: 0 16px !important;
+    height: 70px !important;
+  }
+
+  .page-title {
+    font-size: 18px !important;
+  }
+
+  .header-actions {
+    display: none !important; /* Ocultar detalles no esenciales en pantallas muy chicas */
+  }
+
+  .content-body {
+    padding: 16px !important;
+  }
+
+  .metrics-grid {
+    gap: 16px !important;
+    margin-bottom: 24px !important;
+  }
+
+  .card {
+    padding: 16px !important;
+  }
+
+  .modal-content {
+    margin: 16px !important;
+    max-height: calc(100vh - 32px) !important;
+  }
+
+  .modal-body {
+    padding: 16px !important;
+  }
+
+  /* Ajustes para layouts split de dos columnas a una */
+  .detail-layout {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+}
+
+/* Small Mobile Screens */
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 16px !important;
+  }
+
+  .btn {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+  }
+}
