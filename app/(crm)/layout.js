@@ -114,7 +114,7 @@ export default function CRMLayout({ children }) {
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['administrador', 'propietario', 'vendedor', 'secretario'] },
     { name: 'Contactos', path: '/contacts', icon: Users, roles: ['administrador', 'propietario', 'vendedor', 'secretario'] },
-    { name: 'Embudo de Ventas', path: '/pipeline', icon: LineChart, roles: ['administrador', 'propietario', 'vendedor'] }, // Secretarios no ven finanzas/pipeline
+    { name: 'Ventas', path: '/pipeline', icon: LineChart, roles: ['administrador', 'propietario', 'vendedor'] }, // Secretarios no ven finanzas/pipeline
     { name: 'Tareas Pendientes', path: '/tasks', icon: CheckSquare, roles: ['administrador', 'propietario', 'vendedor', 'secretario'] },
     { name: 'Base de Datos (Google)', path: '/setup', icon: Database, roles: ['administrador'] }, // Solo Admin
     { name: 'Usuarios & Accesos', path: '/users', icon: UserCheck, roles: ['administrador', 'propietario'] }
@@ -203,7 +203,7 @@ export default function CRMLayout({ children }) {
               <h1 className="page-title">
                 {pathname === '/dashboard' && 'Panel de Control'}
                 {pathname === '/contacts' && 'Directorio de Contactos'}
-                {pathname === '/pipeline' && 'Embudo de Ventas'}
+                {pathname === '/pipeline' && 'Ventas'}
                 {pathname === '/tasks' && 'Tareas Comerciales'}
                 {pathname === '/setup' && 'Configuración de Google Sheets'}
                 {pathname === '/users' && 'Gestión de Usuarios'}
