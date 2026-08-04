@@ -975,6 +975,26 @@ button, input, select, textarea {
     grid-template-columns: 1fr !important;
     gap: 16px !important;
   }
+
+  /* Login adaptativo */
+  .login-container {
+    flex-direction: column !important;
+  }
+
+  .login-left {
+    display: none !important;
+  }
+
+  .login-right {
+    padding: 24px !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+  }
+
+  .login-card {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
 }
 
 /* Small Mobile Screens */
