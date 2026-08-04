@@ -864,6 +864,10 @@ button, input, select, textarea {
   border-color: var(--success);
 }
 
+.sidebar-mobile-header {
+  display: none;
+}
+
 /* ==========================================================================
    RESPONSIVE DESIGN (MEDIA QUERIES)
    ========================================================================== */
